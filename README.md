@@ -32,6 +32,7 @@ Replayed Stats replays actions on media so that the statistics for media are som
 
 There are various levels of implementation on the media publisher side:
 
+
 ### Media publisher implementation level: None
 
 The media publisher receives every once and a while a bulk of requests to the URLs of the videos that the Wi-Fi box owner has downloaded and put on the Wi-Fi box. This is a shallow replay of what happened, meaning it will trigger a download on each URL. This MUST happen in a throttling manner with a 50 milliseconds delay in between calls to that it will not overload the media publishers server.
@@ -42,6 +43,7 @@ This requires the media consumer to keep the original URL where they have downlo
 
 The software do to the replaying of the media usage will be called "StatsReplayer". This piece of software also contains a way of capturing usage. More on that in the chapter "StatsReplayer".
 
+
 ### Media publisher implementation level: Bulk support
 
 When the media publisher receives a request it MUST check the HTTP headers for the header "replayed-stats" with the value "bulk". If it finds this header it MUST respond with a 303 See Other. The HTTP header "Location" MUST contain the URL where the Wi-Fi box can POST the statistics to. The publisher MUST also set the HTTP header "replayed-stats": "bulk".
@@ -49,6 +51,7 @@ When the media publisher receives a request it MUST check the HTTP headers for t
 When the Wi-Fi box receives a 303 it MUST check if it also receives a "replayed-stats": "bulk" header. If so, then it MUST switch to bulk uploading statistics.
 
 The format for the bulk upload is described in the chapter "Bulk Upload Format"
+
 
 ## StatsReplayer
 
@@ -63,6 +66,7 @@ Example:
 ```
 
 The StatsReplayer runs at https://wifi.local/stats-replayer. It will receive a call on the '/capture' route. It will save a timestamp and the URL that is requested and will redirect the URL to the file requested. Because there is no internet available the StatsReplayer needs to have a local folder on the hard disk where these videos are stored. Storing these videos and retrieving these videos will be done by a concept called "Resolvers". A resolver may decide to hash the URL and save every file in one folder. A Resoler may also decide to simulate the same folder structure. It must however be able to store the files when initially putting the media on the Wi-Fi box and it must be able to return the file from a given URL.
+
 
 ## Bulk Upload Format
 
@@ -96,5 +100,5 @@ JSON Body:
     ]
 }
 ```
-
-The string MUST be like 00-00-00-000 where the last numeric part MUST be the milliseconds. Depending on if the video takes less than a minute or less than an hour numbers may be skipped.
+The "ranges" key can be filled with an array containing range objects. Where a range object MUST contain a start key with the value of the start time as a ISO 8601 date, 2023-01-23T12:10:44+00:00.
+The "viewed" value string MUST be like 00:00:00:000-00:00:00:000 where the last numeric part MUST be the milliseconds. Depending on if the video takes less than a minute or less than an hour numbers may be skipped.
