@@ -94,7 +94,7 @@ JSON Body:
     "ranges": [
         { 
             "start": "2023-01-21T11:33:17+00:00", 
-            "viewed": "01:07:000-01:22:000 
+            "viewed": "01:07:000-01:22:000" 
         },
         // ... 16 more objects like ^
     ]
@@ -102,3 +102,31 @@ JSON Body:
 ```
 The "ranges" key can be filled with an array containing range objects. Where a range object MUST contain a start key with the value of the start time as a ISO 8601 date, 2023-01-23T12:10:44+00:00.
 The "viewed" value string MUST be like 00:00:00:000-00:00:00:000 where the last numeric part MUST be the milliseconds. Depending on if the video takes less than a minute or less than an hour numbers may be skipped.
+
+## Implementation on the publisher side
+
+Here is an example how a redirect in NGINX could be implemented.
+
+```
+server {
+    listen 80;
+    server_name example.com; # Replace this with your own hostname
+    if ($http_replayed_stats = "bulk") {
+        return 303 https://example.com/bulk-upload-stats;
+    }
+
+    # Rest of configuration goes here... 
+}
+```
+
+/bulk-upload-stats Should then record the statistics into the statistics server as it normally would do with real time statistics. This will differ per implementation of a statistics server.
+
+## Alternatives considered
+
+### Hashes
+
+The downside of hashes is the it is computation heavy and it requires both the Wi-Fi box and the publisher to do this computation. Using URLs in this usecase is much more efficient because the files are already offered on an URL. The downside here is that the Wi-Fi box needs to keep track of every URL it has used.
+
+## Overview diagram
+
+![Overview diagram](/ReplayedStats.svg "Overview diagram")
